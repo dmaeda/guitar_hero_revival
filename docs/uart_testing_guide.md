@@ -40,6 +40,8 @@ Example with a different baud rate and message:
 python3 files/utilities/rpi_uart_test.py /dev/serial0 --baud 9600 --message HELLO_UART
 ```
 
+`--message` must be a non-empty string.
+
 ## Expected result
 
 If the UART loopback wiring and port configuration are correct, each attempt should print `PASS`.

@@ -152,7 +152,7 @@ def main() -> int:
     payload = args.message.encode("utf-8")
 
     try:
-        fd = os.open(args.device, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
+        fd = os.open(args.device, os.O_RDWR | os.O_NOCTTY)
     except OSError as exc:
         print(f"Unable to open {args.device}: {exc}", file=sys.stderr)
         return 1
