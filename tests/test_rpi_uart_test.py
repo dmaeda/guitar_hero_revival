@@ -68,6 +68,8 @@ class RpiUartTestScriptTest(unittest.TestCase):
     def test_loopback_pass_returns_zero(self) -> None:
         result = self.run_script(with_echo=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("Testing ", result.stdout)
+        self.assertIn("Tip: connect UART TX to RX for a simple loopback test.", result.stdout)
         self.assertIn("Attempt 1: PASS", result.stdout)
 
     def test_loopback_fail_returns_one(self) -> None:

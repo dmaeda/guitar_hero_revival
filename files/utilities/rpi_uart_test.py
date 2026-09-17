@@ -145,7 +145,7 @@ def run_loopback(fd: int, payload: bytes, attempts: int, timeout: float) -> bool
         if written != len(payload) or received != payload:
             success = False
             print(f"Attempt {attempt}: FAIL")
-            print(f"  Sent:     {payload!r}")
+            print(f"  Sent:     {payload[:written]!r}")
             print(f"  Received: {received!r}")
         else:
             print(f"Attempt {attempt}: PASS")
