@@ -1,13 +1,25 @@
+import contextlib
+import importlib.util
+import io
 import os
 import pty
 import subprocess
 import threading
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "files" / "utilities" / "rpi_uart_test.py"
+
+
+def load_script_module():
+    spec = importlib.util.spec_from_file_location("rpi_uart_test", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
 
 
 class RpiUartTestScriptTest(unittest.TestCase):
@@ -96,6 +108,49 @@ class RpiUartTestScriptTest(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
         self.assertIn("must not be empty", result.stderr)
+
+    def test_invalid_timeout_is_rejected_by_argparse(self) -> None:
+        result = subprocess.run(
+            [
+                "python3",
+                str(SCRIPT),
+                "/dev/null",
+                "--timeout",
+                "0",
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("must be greater than 0", result.stderr)
+
+    def test_runtime_oserror_returns_one(self) -> None:
+        module = load_script_module()
+        stderr = io.StringIO()
+
+        with (
+            mock.patch.object(
+                module,
+                "parse_args",
+                return_value=mock.Mock(
+                    device="/dev/serial0",
+                    baud=115200,
+                    message="UART_TEST",
+                    attempts=1,
+                    timeout=1.0,
+                ),
+            ),
+            mock.patch.object(module.os, "open", return_value=123),
+            mock.patch.object(module, "configure_port", side_effect=OSError("boom")),
+            mock.patch.object(module.os, "close"),
+            contextlib.redirect_stderr(stderr),
+        ):
+            result = module.main()
+
+        self.assertEqual(result, 1)
+        self.assertIn("UART test failed: boom", stderr.getvalue())
 
 
 if __name__ == "__main__":

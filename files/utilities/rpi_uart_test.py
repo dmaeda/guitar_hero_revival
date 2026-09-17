@@ -30,6 +30,13 @@ def non_empty_string(value: str) -> str:
     return value
 
 
+def positive_float(value: str) -> float:
+    parsed = float(value)
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("must be greater than 0")
+    return parsed
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run a simple UART loopback test on a Raspberry Pi serial port."
@@ -56,7 +63,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--timeout",
-        type=float,
+        type=positive_float,
         default=2.0,
         help="Timeout in seconds for each loopback attempt (default: 2.0)",
     )
