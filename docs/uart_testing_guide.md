@@ -24,7 +24,7 @@ Enable the serial port on the Raspberry Pi before running the test:
 5. Enable the serial hardware
 6. Reboot if prompted
 
-The default device is often `/dev/serial0`.
+A common UART device path on Raspberry Pi is `/dev/serial0`, but the script does not auto-detect it: pass the device path explicitly.
 
 ## Run the test
 

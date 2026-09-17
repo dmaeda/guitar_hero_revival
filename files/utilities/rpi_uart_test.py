@@ -102,7 +102,10 @@ def read_exact(fd: int, size: int, timeout: float) -> bytes:
         if not readable:
             break
 
-        chunk = os.read(fd, size - len(data))
+        try:
+            chunk = os.read(fd, size - len(data))
+        except BlockingIOError:
+            continue
         if not chunk:
             continue
         data.extend(chunk)
@@ -123,7 +126,10 @@ def write_all(fd: int, payload: bytes, timeout: float) -> int:
         if not writable:
             break
 
-        total_written += os.write(fd, payload[total_written:])
+        try:
+            total_written += os.write(fd, payload[total_written:])
+        except BlockingIOError:
+            continue
 
     return total_written
 
@@ -152,7 +158,7 @@ def main() -> int:
     payload = args.message.encode("utf-8")
 
     try:
-        fd = os.open(args.device, os.O_RDWR | os.O_NOCTTY)
+        fd = os.open(args.device, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
     except OSError as exc:
         print(f"Unable to open {args.device}: {exc}", file=sys.stderr)
         return 1
