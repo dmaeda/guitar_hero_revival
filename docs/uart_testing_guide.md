@@ -2,7 +2,7 @@
 
 This repository now includes a simple UART loopback test utility for Raspberry Pi:
 
-`/home/runner/work/guitar_hero_revival/guitar_hero_revival/files/utilities/rpi_uart_test.py`
+`files/utilities/rpi_uart_test.py`
 
 ## What it does
 

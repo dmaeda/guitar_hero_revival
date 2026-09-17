@@ -54,12 +54,7 @@ def configure_port(fd: int, baud_rate: int) -> None:
 
     attrs[0] = 0
     attrs[1] = 0
-    attrs[2] &= ~termios.CSIZE
-    attrs[2] |= termios.CS8 | termios.CLOCAL | termios.CREAD
-    attrs[2] &= ~termios.PARENB
-    attrs[2] &= ~termios.CSTOPB
-    if hasattr(termios, "CRTSCTS"):
-        attrs[2] &= ~termios.CRTSCTS
+    attrs[2] = termios.CS8 | termios.CLOCAL | termios.CREAD
     attrs[3] = 0
     attrs[4] = BAUD_RATES[baud_rate]
     attrs[5] = BAUD_RATES[baud_rate]
