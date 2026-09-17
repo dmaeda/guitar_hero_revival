@@ -63,6 +63,40 @@ class RpiUartTestScriptTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("Attempt 1: FAIL", result.stdout)
 
+    def test_invalid_attempts_is_rejected_by_argparse(self) -> None:
+        result = subprocess.run(
+            [
+                "python3",
+                str(SCRIPT),
+                "/dev/null",
+                "--attempts",
+                "0",
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("must be at least 1", result.stderr)
+
+    def test_empty_message_is_rejected_by_argparse(self) -> None:
+        result = subprocess.run(
+            [
+                "python3",
+                str(SCRIPT),
+                "/dev/null",
+                "--message",
+                "",
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("must not be empty", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

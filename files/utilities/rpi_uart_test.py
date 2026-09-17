@@ -17,6 +17,19 @@ BAUD_RATES = {
 }
 
 
+def positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be at least 1")
+    return parsed
+
+
+def non_empty_string(value: str) -> str:
+    if not value:
+        raise argparse.ArgumentTypeError("must not be empty")
+    return value
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run a simple UART loopback test on a Raspberry Pi serial port."
@@ -31,12 +44,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--message",
+        type=non_empty_string,
         default="GUITAR_HERO_UART_TEST",
         help="Message to transmit during the test",
     )
     parser.add_argument(
         "--attempts",
-        type=int,
+        type=positive_int,
         default=3,
         help="Number of loopback attempts to run (default: 3)",
     )
@@ -128,15 +142,7 @@ def run_loopback(fd: int, payload: bytes, attempts: int, timeout: float) -> bool
 
 def main() -> int:
     args = parse_args()
-
-    if args.attempts < 1:
-        print("--attempts must be at least 1", file=sys.stderr)
-        return 2
-
     payload = args.message.encode("utf-8")
-    if not payload:
-        print("--message must not be empty", file=sys.stderr)
-        return 2
 
     try:
         fd = os.open(args.device, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
