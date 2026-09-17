@@ -1,0 +1,53 @@
+# Raspberry Pi UART Test
+
+This repository now includes a simple UART loopback test utility for Raspberry Pi:
+
+`/home/runner/work/guitar_hero_revival/guitar_hero_revival/files/utilities/rpi_uart_test.py`
+
+## What it does
+
+The script opens a UART device, configures the selected baud rate, sends a short message, and checks whether the exact same bytes are received back.
+
+This is intended for a basic **loopback test**, where:
+
+- **TX** is connected to **RX**
+- **GND** is connected to **GND**
+
+## Raspberry Pi setup
+
+Enable the serial port on the Raspberry Pi before running the test:
+
+1. Run `sudo raspi-config`
+2. Open `Interface Options`
+3. Open `Serial Port`
+4. Disable the login shell over serial
+5. Enable the serial hardware
+6. Reboot if prompted
+
+The default device is often `/dev/serial0`.
+
+## Run the test
+
+From the repository root:
+
+```bash
+python3 files/utilities/rpi_uart_test.py /dev/serial0
+```
+
+Example with a different baud rate and message:
+
+```bash
+python3 files/utilities/rpi_uart_test.py /dev/serial0 --baud 9600 --message HELLO_UART
+```
+
+## Expected result
+
+If the UART loopback wiring and port configuration are correct, each attempt should print `PASS`.
+
+If the test fails, verify:
+
+- UART is enabled on the Raspberry Pi
+- TX and RX are crossed correctly
+- Ground is shared
+- The selected UART device is correct
+- The baud rate matches the expected configuration
