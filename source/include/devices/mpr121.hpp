@@ -1,0 +1,19 @@
+#pragma once
+#include "base.hpp"
+#include "device.pb.h"
+#include "libmpr121.hpp"
+class MPR121Device : public Device
+{
+public:
+    ~MPR121Device() {}
+    MPR121Device(proto_Mpr121Device device, uint16_t id);
+    void begin();
+    void end(bool full);
+    void update(bool full_poll, bool send_events);
+    bool using_pin(uint8_t pin);
+    MPR121 m_mpr121;
+
+private:
+    proto_Mpr121Device m_device;
+    uint32_t m_last_value = 0;
+};

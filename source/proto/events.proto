@@ -1,0 +1,137 @@
+syntax = "proto2";
+package proto;
+import "enums.proto";
+
+message CrkdCalibrationData {
+    required uint32 red_pad = 1;
+    required uint32 yellow_pad = 2;
+    required uint32 blue_pad = 3;
+    required uint32 green_pad = 4;
+    required uint32 orange_pad = 5;
+    required uint32 yellow_cymbal = 6;
+    required uint32 blue_cymbal = 7;
+    required uint32 green_cymbal = 8;
+    required uint32 kick1 = 9;
+    required uint32 kick2 = 10;
+}
+message CrkdCalibrationDataEvent {
+    required uint32 id = 1;
+    required CrkdDrumCalibrationType type = 2;
+    required CrkdCalibrationData data = 3;
+}
+
+message ButtonEvent {
+    required uint32 id = 1;
+    required bool stateRaw = 2;
+    required bool state = 3;
+}
+
+message CycleEvent {
+    required uint32 id = 1;
+    required uint32 state = 2;
+}
+
+message ToggleEvent {
+    required uint32 id = 1;
+    required bool state = 2;
+}
+
+message AxisEvent {
+    required uint32 id = 1;
+    required uint32 stateRaw = 2;
+    required uint32 state = 3;
+}
+
+message LedEvent {
+    required uint32 id = 1;
+    required uint32 stateRaw = 2;
+    required uint32 state = 3;
+}
+
+
+message ActivationTriggerEvent {
+    required uint32 id = 1;
+    required uint32 listId = 2;
+    required uint32 stateRaw = 3;
+    required bool state = 4;
+}
+
+message ActivationListEvent {
+    required uint32 listId = 1;
+    required bool state = 2;
+}
+
+message PinDetectionEvent {
+    required int32 pin = 1;
+}
+
+message MidiDetectionEvent {
+    required int32 note = 1;
+}
+
+message DeviceHotplugEvent {
+    required int32 id = 1;
+    required bool connected = 2;
+}
+
+message UsbDeviceHotplugEvent {
+    required int32 id = 1;
+    required SubType subtype = 2;
+    required int32 port = 3;
+    required int32 interface = 4;
+    required bool connected = 5;
+    required string name = 6;
+    optional uint32 sourceId = 7;
+}
+
+message WiiDeviceHotplugEvent {
+    required int32 id = 1;
+    required WiiExtType extension = 2;
+}
+
+message PS2DeviceHotplugEvent {
+    required int32 id = 1;
+    required int32 type = 2;
+}
+
+message DebugEvent {
+    required bytes data = 1; 
+}
+message ConsoleEvent {
+    required string data = 1; 
+}
+
+message MidiEvent {
+    required bytes data = 1;  
+}
+
+message ReloadEvent {
+
+}
+
+message Event {
+    oneof event{
+        ButtonEvent button = 1;   
+        AxisEvent axis = 2;
+        PinDetectionEvent pin = 3;
+        MidiDetectionEvent midi = 4;
+        UsbDeviceHotplugEvent usb = 5;
+        WiiDeviceHotplugEvent wii = 6;
+        PS2DeviceHotplugEvent ps2 = 7;
+        DeviceHotplugEvent device = 8;
+        DebugEvent debug = 9;
+        ActivationTriggerEvent trigger = 10;
+        LedEvent led = 11;  
+        MidiEvent midiDebug = 12;
+        ConsoleEvent console = 13;
+        CycleEvent cycle = 14;
+        ToggleEvent toggle = 15;
+        CrkdCalibrationDataEvent crkdDrum = 16;
+        ReloadEvent reload = 17;
+        ActivationListEvent activationList = 18;
+    };
+}
+
+message EventList {
+    repeated Event event = 1;
+}

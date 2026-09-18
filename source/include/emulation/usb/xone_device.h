@@ -1,0 +1,82 @@
+#pragma once
+
+#include "common/tusb_common.h"
+#include "device/usbd.h"
+#include "devices/usb/host/xone_host.h"
+#include "device.hpp"
+
+#ifndef CFG_TUD_XONE_EPSIZE
+#define CFG_TUD_XONE_EPSIZE 64
+#endif
+
+typedef enum
+{
+    EMU_READY_ANNOUNCE,
+    EMU_WAIT,
+    EMU_SEND_DESCRIPTOR,
+    EMU_SETUP_AUTH,
+    EMU_AUTH_DONE,
+    EMU_NOT_READY
+} XboxOneDriverState;
+
+typedef struct {
+    uint8_t report[CFG_TUD_XONE_RX_BUFSIZE];
+    uint16_t len;
+} report_queue_t;
+
+class XboxOneGamepadDevice : public UsbDevice
+{
+public:
+    ~XboxOneGamepadDevice();
+    XboxOneGamepadDevice();
+    void initialize();
+    void process(bool full_poll, bool send_events);
+    size_t compatible_section_descriptor(uint8_t *desc, size_t remaining);
+    size_t config_descriptor(uint8_t *desc, size_t remaining);
+    size_t device_name(uint8_t idx, char *desc);
+    void device_descriptor(tusb_desc_device_t *desc);
+    bool interrupt_xfer(uint8_t ep_addr, xfer_result_t result, uint32_t xferred_bytes);
+    bool control_transfer(uint8_t stage, tusb_control_request_t const *request);
+    void process_report_queue(uint32_t now);
+    bool send_xbone_usb(uint8_t const *report, uint16_t report_size);
+    void queue_xbone_report(void *report, uint16_t report_size);
+    void send_report_from_controller(XGIPProtocol* report);
+    uint16_t open(tusb_desc_interface_t const *itf_desc, uint16_t max_len);
+    void set_ack_wait();
+    uint8_t m_epin;
+    uint8_t m_epout;
+
+    CFG_TUSB_MEM_ALIGN uint8_t epin_buf[CFG_TUD_XONE_TX_BUFSIZE];
+    CFG_TUSB_MEM_ALIGN uint8_t epout_buf[CFG_TUD_XONE_RX_BUFSIZE];
+
+private:
+    uint8_t last_report[CFG_TUD_XONE_RX_BUFSIZE] = {};
+    uint8_t last_report_counter;
+    uint32_t keep_alive_timer;
+    uint8_t global_sequence;
+    uint8_t security_sequence;
+    bool auth_completed = false;
+    bool xb1_guide_pressed = false;
+    bool xb1_share_pressed = false;
+    uint8_t xbone_led_mode;
+
+    bool waiting_ack = false;
+    uint32_t waiting_ack_timeout = 0;
+    uint32_t timer_wait_for_announce;
+    bool xbox_one_powered_on;
+    uint8_t report_led_mode;
+    uint8_t report_led_brightness;
+    uint16_t input_report_length = 0;
+
+    XGIPProtocol outgoingXGIP;
+    XGIPProtocol incomingXGIP;
+    // Check report queue every 35 milliseconds
+    uint32_t m_last_report_queue = 0;
+
+    static constexpr size_t REPORT_QUEUE_CAPACITY = 4;
+    report_queue_t report_queue[REPORT_QUEUE_CAPACITY];
+    uint8_t report_queue_head = 0;
+    uint8_t report_queue_count = 0;
+
+    XboxOneDriverState xboneDriverState = EMU_NOT_READY;
+};

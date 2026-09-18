@@ -1,0 +1,19 @@
+#pragma once
+#include "base.hpp"
+#include "device.pb.h"
+#include "input_enums.pb.h"
+#include "libapa102.hpp"
+class APA102Device : public LedDevice
+{
+public:
+    ~APA102Device() {}
+    APA102Device(proto_APA102Device device, uint16_t id);
+    void begin();
+    void end(bool full);
+    void update(bool full_poll, bool send_events);
+    bool using_pin(uint8_t pin);
+
+private:
+    APA102 m_apa102;
+    proto_APA102Device m_device;
+};

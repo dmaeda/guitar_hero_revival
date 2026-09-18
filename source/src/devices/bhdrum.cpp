@@ -1,0 +1,33 @@
+#include "devices/bhdrum.hpp"
+#include "events.pb.h"
+#include "main.hpp"
+#include "config/config.hpp"
+#include "emulation/usb/hid_device.h"
+BandHeroDrumDevice::BandHeroDrumDevice(const DeviceReloadState* state, proto_BandHeroDrumDevice device, uint16_t id) : MidiDevice(state, id, false), m_band_hero_drum(this, device.i2c.block, device.i2c.sda, device.i2c.scl, device.i2c.clock), m_device(device)
+{
+}
+void BandHeroDrumDevice::begin()
+{
+    m_band_hero_drum.begin();
+}
+
+void BandHeroDrumDevice::end(bool full)
+{
+    m_band_hero_drum.end();
+}
+void BandHeroDrumDevice::update(bool full_poll, bool send_events)
+{
+    m_band_hero_drum.tick();
+    if (m_lastConnected != m_band_hero_drum.is_connected() || full_poll)
+    {
+        m_lastConnected = m_band_hero_drum.is_connected();
+        proto_Event event = {which_event : proto_Event_device_tag, event : {device : {m_id, m_lastConnected}}};
+        HIDConfigDevice::send_event(event, true);
+    }
+    MidiDevice::update(full_poll, send_events);
+}
+
+bool BandHeroDrumDevice::using_pin(uint8_t pin)
+{
+    return pin == m_device.i2c.scl || pin == m_device.i2c.sda;
+}

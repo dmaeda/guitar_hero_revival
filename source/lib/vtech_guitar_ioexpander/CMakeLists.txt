@@ -1,0 +1,6 @@
+add_library(vtech_guitar_ioexpander INTERFACE)
+target_include_directories(vtech_guitar_ioexpander INTERFACE .)
+target_link_libraries(vtech_guitar_ioexpander INTERFACE
+    peripherals
+)
+target_sources(vtech_guitar_ioexpander INTERFACE vtech_guitar_ioexpander.cpp)

@@ -1,0 +1,15 @@
+Atualizado SW_Push de BUTTON_A para BUTTON_A1.
+Atualizado SW_Push de BUTTON_B para BUTTON_B1.
+Atualizado SW_Push de BUTTON_GUIDE para BUTTON_GUIDE1.
+Atualizado SW_Push de BUTTON_LB para BUTTON_LB1.
+Atualizado SW_Push de BUTTON_RB para BUTTON_RB1.
+Atualizado SW_Push de BUTTON_SELECT para BUTTON_SELECT1.
+Atualizado SW_Push de BUTTON_START para BUTTON_START1.
+Atualizado SW_Push de BUTTON_X para BUTTON_X1.
+Atualizado SW_Push de BUTTON_Y para BUTTON_Y1.
+Atualizado SW_Push de DPAD_DOWN para DPAD_DOWN1.
+Atualizado SW_Push de DPAD_LEFT para DPAD_LEFT1.
+Atualizado SW_Push de DPAD_RIGHT para DPAD_RIGHT1.
+Atualizado SW_Push de DPAD_UP para DPAD_UP1.
+Anotação concluída.
+Anotação concluída.

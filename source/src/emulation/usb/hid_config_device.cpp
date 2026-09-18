@@ -1,0 +1,603 @@
+#include "tusb_option.h"
+#include "managers/config_manager.hpp"
+#include "managers/device_manager.hpp"
+#include "config/config.hpp"
+#include "managers/profile_manager.hpp"
+
+#include "commands.pb.h"
+#include "enums.pb.h"
+#include "main.hpp"
+#include "emulation/usb/hid_device.h"
+#include "emulation/usb/ps3_device.h"
+#include "emulation/usb/ps4_device.h"
+#include "devices/crkd_drum.hpp"
+#include "device/usbd.h"
+#include "hid_reports.h"
+#include "device/usbd_pvt.h"
+#include "pico/bootrom.h"
+#include "utils.h"
+#include "hardware/gpio.h"
+#include "hardware/adc.h"
+#include "math.h"
+#include <pico_fota_bootloader/core.h>
+
+static const char version[] = GIT_HASH;
+static const char type[] = PICO_BOARD;
+uint8_t const desc_hid_report_config[] =
+    {
+
+        HID_USAGE_PAGE_N(HID_USAGE_PAGE_VENDOR, 2),
+        HID_USAGE(0x01),
+        HID_COLLECTION(HID_COLLECTION_APPLICATION),
+        TUD_HID_REPORT_DESC_GENERIC_INFEATURE(63, HID_REPORT_ID(ReportIdConfig)),
+        TUD_HID_REPORT_DESC_GENERIC_FEATURE(63, HID_REPORT_ID(ReportIdConfigInfo)),
+        TUD_HID_REPORT_DESC_GENERIC_FEATURE(1, HID_REPORT_ID(ReportIdLoaded)),
+        TUD_HID_REPORT_DESC_GENERIC_FEATURE(63, HID_REPORT_ID(ReportIdCommand)),
+        TUD_HID_REPORT_DESC_GENERIC_FEATURE(1, HID_REPORT_ID(ReportIdKeepalive)),
+        TUD_HID_REPORT_DESC_GENERIC_FEATURE(1, HID_REPORT_ID(ReportIdBootloader)),
+        TUD_HID_REPORT_DESC_GENERIC_FEATURE(63, HID_REPORT_ID(ReportIdGetActiveProfiles)),
+        TUD_HID_REPORT_DESC_GENERIC_FEATURE(63, HID_REPORT_ID(ReportIdUpdateFirmware)),
+        TUD_HID_REPORT_DESC_GENERIC_FEATURE(33, HID_REPORT_ID(ReportIdUploadFirmware)),
+        TUD_HID_REPORT_DESC_GENERIC_FEATURE(sizeof(version) + 1, HID_REPORT_ID(ReportIdGetVersion)),
+        TUD_HID_REPORT_DESC_GENERIC_FEATURE(sizeof(type) + 1, HID_REPORT_ID(ReportIdGetType)),
+        HID_COLLECTION_END};
+
+HIDConfigDevice::HIDConfigDevice()
+{
+}
+void HIDConfigDevice::initialize()
+{
+  m_epin = next_epin();
+}
+void HIDConfigDevice::process(bool full_poll, bool send_events)
+{
+  if (clearedIn && clearedOut)
+  {
+    ConfigManager::instance().request_mode(ModeSwitch);
+  }
+  // if (millis() - lastKeepAlive > 10000) {
+  //   if (debug_enabled) {
+  //     deinitDebug();
+  //     debug_enabled = false;
+  //   }
+  // }
+  if (tool_closed())
+  {
+    profile_selected = false;
+    return;
+  }
+  bool profile_just_changed = profile_changed;
+  if (profile_changed)
+  {
+    profile_changed = false;
+    ProfileManager::instance().for_each_profile([](uint32_t profile_id, const auto &profile)
+                                                {
+      (void)profile_id;
+      for (const auto &led : profile->leds)
+      {
+        led->off();
+      } });
+  }
+  if (just_loaded)
+  {
+    DeviceManager::instance().update_all_devices(true, true);
+    ProfileManager::instance().update_all_profile_devices(true, true);
+    just_loaded = false;
+  }
+  if (profile_selected)
+  {
+    auto selected_ptr = ProfileManager::instance().get_profile(selected_profile, selected_instance);
+    if (!selected_ptr)
+    {
+      return;
+    }
+    auto selected = std::make_pair(selected_profile, selected_ptr);
+    if (detect_done)
+    {
+
+      switch (m_detect_type)
+      {
+      case DetectDigital:
+        for (uint8_t i = 0; i < NUM_BANK0_GPIOS; i++)
+        {
+          if (m_valid_pins & (1 << i) && gpio_get(i) != last_digital_vals[i])
+          {
+            printf("detected digital: %d %d %d\r\n", i, gpio_get(i), last_digital_vals[i]);
+            detect_done = 0;
+            proto_Event evt;
+            evt.which_event = proto_Event_pin_tag;
+            evt.event.pin.pin = i;
+            send_event(evt, true);
+            break;
+          }
+        }
+        break;
+      case DetectAnalog:
+        for (uint8_t i = 0; i < NUM_ADC_CHANNELS; i++)
+        {
+          if (m_valid_pins & (1 << i))
+          {
+            adc_select_input(i);
+            if (abs(last_adc_vals[i] - adc_read()) > 100)
+            {
+              // found!
+              printf("detected adc: %d %d %d\r\n", last_adc_vals[i], adc_read(), i + ADC_BASE_PIN);
+              detect_done = 0;
+              proto_Event evt;
+              evt.which_event = proto_Event_pin_tag;
+              evt.event.pin.pin = i + ADC_BASE_PIN;
+              send_event(evt, true);
+              break;
+            }
+          }
+        }
+        break;
+      }
+
+      if (profile_just_changed || (detect_done && millis() > detect_done))
+      {
+        detect_done = 0;
+      }
+      if (!detect_done)
+      {
+        switch (m_detect_type)
+        {
+        case DetectDigital:
+          for (uint8_t i = 0; i < NUM_BANK0_GPIOS; i++)
+          {
+            if (m_valid_pins & (1 << i))
+            {
+              gpio_init(i);
+              gpio_set_dir(i, false);
+              gpio_set_pulls(i, false, false);
+            }
+          }
+          break;
+        case DetectAnalog:
+          for (uint8_t i = 0; i < NUM_ADC_CHANNELS; i++)
+          {
+            if (m_valid_pins & (1 << i))
+            {
+              adc_gpio_init(i + ADC_BASE_PIN);
+              gpio_set_pulls(i + ADC_BASE_PIN, false, false);
+            }
+          }
+          break;
+        }
+        for (auto &mapping : selected.second->mappings)
+        {
+          mapping->reload();
+        }
+        for (auto &led : selected.second->leds)
+        {
+          led->reload();
+        }
+      }
+    }
+    else
+    {
+      if (profile_just_changed)
+      {
+        DeviceManager::instance().update_all_devices(profile_just_changed, true);
+        ProfileManager::instance().update_all_profile_devices(profile_just_changed, true);
+      }
+      ProfileManager::instance().update_profile_components(selected_profile, selected_instance, profile_just_changed, true);
+    }
+  }
+  process_events();
+}
+
+void HIDConfigDevice::process_events()
+{
+  // safety net in case event_count was ever pushed past the array's capacity
+  if (list.event_count > TU_ARRAY_SIZE(list.event))
+  {
+    list.event_count = TU_ARRAY_SIZE(list.event);
+  }
+  if (list.event_count == 0 || !tud_ready() || usbd_edpt_busy(TUD_OPT_RHPORT, m_epin))
+  {
+    return;
+  }
+
+  processing = true;
+  epin_buf[0] = ReportId::ReportIdConfig;
+
+  // A full batch (up to max_count events) can overflow the 63 byte report once a
+  // large event (e.g. UsbDeviceHotplugEvent's name) is in it - shrink the batch
+  // (in place, no extra stack copy of the struct) until it actually fits instead
+  // of silently dropping everything on overflow.
+  pb_size_t total_count = list.event_count;
+  pb_size_t sent_count = total_count;
+  bool encoded = false;
+  while (sent_count > 0)
+  {
+    list.event_count = sent_count;
+    pb_ostream_t outputStream = pb_ostream_from_buffer(epin_buf + 1, 63);
+    if (pb_encode_delimited(&outputStream, proto_EventList_fields, &list))
+    {
+      usbd_edpt_xfer(TUD_OPT_RHPORT, m_epin, epin_buf, 64, false);
+      encoded = true;
+      break;
+    }
+    sent_count--;
+  }
+  if (!encoded)
+  {
+    // Not even a single event fits - drop it rather than spin on it forever.
+    sent_count = 1;
+  }
+
+  // Keep whatever didn't get sent this round queued for the next flush.
+  for (pb_size_t i = sent_count; i < total_count; i++)
+  {
+    list.event[i - sent_count] = list.event[i];
+  }
+  list.event_count = total_count - sent_count;
+  processing = false;
+}
+
+size_t HIDConfigDevice::compatible_section_descriptor(uint8_t *dest, size_t remaining)
+{
+  return 0;
+}
+
+size_t HIDConfigDevice::config_descriptor(uint8_t *dest, size_t remaining)
+{
+  uint8_t desc[] = {TUD_HID_DESCRIPTOR(interface_id, 0, HID_ITF_PROTOCOL_NONE, sizeof(desc_hid_report_config), m_epin, CFG_TUD_HID_EP_BUFSIZE, 1)};
+  assert(sizeof(desc) <= remaining);
+  memcpy(dest, desc, sizeof(desc));
+  return sizeof(desc);
+}
+
+size_t HIDConfigDevice::device_name(uint8_t idx, char *desc)
+{
+  return 0;
+}
+
+void HIDConfigDevice::device_descriptor(tusb_desc_device_t *desc)
+{
+}
+const uint8_t *HIDConfigDevice::report_descriptor()
+{
+  return desc_hid_report_config;
+}
+
+uint16_t HIDConfigDevice::report_desc_len()
+{
+  return sizeof(desc_hid_report_config);
+}
+
+void HIDConfigDevice::handle_command(proto_Command command)
+{
+  switch (command.which_command)
+  {
+  case proto_Command_setProfile_tag:
+  {
+    printf("Set id: %d, instance: %d\r\n", command.command.setProfile.profileId, command.command.setProfile.instanceId);
+    profile_selected = true;
+    profile_changed = true;
+    selected_profile = command.command.setProfile.profileId;
+    selected_instance = command.command.setProfile.has_instanceId ? command.command.setProfile.instanceId : 0;
+    break;
+  }
+  case proto_Command_reboot_tag:
+  {
+    reload();
+    return;
+  }
+  case proto_Command_save_tag:
+  {
+    printf("Save command received\r\n");
+    EEPROM.commit_now();
+    ConfigManager::instance().set_full_reload(true);
+    reload();
+    return;
+  }
+  case proto_Command_disconnect_tag:
+  {
+    reset_keepalive();
+    return;
+  }
+  case proto_Command_crkdDrum_tag:
+  {
+    std::static_pointer_cast<CrkdDrumDevice>(DeviceManager::instance().get_root_device(command.command.crkdDrum.id))->drum.setParam(command.command.crkdDrum.type, command.command.crkdDrum.axisType, command.command.crkdDrum.val);
+    break;
+  }
+  case proto_Command_detectPin_tag:
+  {
+    // only detect for 10 seconds
+
+    printf("detect: %d\r\n", command.command.detectPin.detectType);
+    detect_done = millis() + 10000;
+    m_valid_pins = 0;
+    m_detect_type = command.command.detectPin.detectType;
+    switch (command.command.detectPin.detectType)
+    {
+    case DetectDigital:
+      for (uint8_t i = 0; i < NUM_BANK0_GPIOS; i++)
+      {
+        if (i == 23)
+        {
+          continue;
+        }
+        bool found = false;
+        DeviceManager::instance().for_each_active_device([&found, i](const auto &device)
+                                                         {
+          if (device->using_pin(i))
+          {
+            found = true;
+          } });
+        if (!found)
+        {
+          m_valid_pins |= 1 << i;
+          gpio_init(i);
+          gpio_set_dir(i, false);
+          gpio_set_pulls(i, true, false);
+          sleep_us(1);
+          last_digital_vals[i] = gpio_get(i);
+        }
+      }
+      break;
+    case DetectAnalog:
+      for (uint8_t i = 0; i < NUM_ADC_CHANNELS; i++)
+      {
+        bool found = false;
+        DeviceManager::instance().for_each_active_device([&found, i](const auto &device)
+                                                         {
+          if (device->using_pin(i + ADC_BASE_PIN))
+          {
+            found = true;
+          } });
+        if (!found)
+        {
+          m_valid_pins |= 1 << i;
+          adc_gpio_init(i + ADC_BASE_PIN);
+          gpio_set_pulls(i + ADC_BASE_PIN, true, false);
+          adc_select_input(i);
+          sleep_us(10);
+          last_adc_vals[i] = adc_read();
+        }
+      }
+      break;
+    }
+  }
+  break;
+  }
+}
+
+void HIDConfigDevice::set_report(uint8_t report_id, hid_report_type_t report_type, uint8_t const *buffer, uint16_t bufsize)
+{
+  if (report_type == HID_REPORT_TYPE_FEATURE)
+  {
+    // skip over report id
+    buffer++;
+    bufsize--;
+    switch (report_id)
+    {
+    case ReportId::ReportIdConfig:
+      tool_seen = true;
+      lastKeepAlive = millis();
+      write_config(buffer, bufsize, start);
+      start += bufsize;
+      break;
+    case ReportId::ReportIdUploadFirmware:
+      tool_seen = true;
+      memcpy(fw_update_tmp + update_state.chunkOffset, buffer + 1, 32);
+      update_state.chunkOffset += 32;
+      if (update_state.chunkOffset == 256)
+      {
+        multicore_lockout_start_blocking();
+        if (pfb_write_to_flash_aligned_256_bytes(fw_update_tmp, update_state.offset, 256))
+        {
+          printf("failed to write update! %02x\r\n", update_state.offset);
+        }
+        if ((update_state.offset + update_state.chunkOffset) >= update_state.firmwareSize)
+        {
+          printf("fw uploaded! checking\r\n");
+          if (pfb_firmware_sha256_check(update_state.firmwareSize))
+          {
+            printf("sha failed!\r\n");
+          }
+          else
+          {
+            pfb_mark_download_slot_as_valid();
+            pfb_perform_update();
+          }
+        }
+        multicore_lockout_end_blocking();
+      }
+      break;
+    case ReportId::ReportIdUpdateFirmware:
+    {
+      pb_istream_t inputStream = pb_istream_from_buffer(buffer + 1, bufsize - 1);
+      if (!pb_decode_delimited(&inputStream, proto_FirmwareUpdate_fields, &update_state))
+      {
+        printf("Didn't decode fw update?\r\n");
+        break;
+      }
+      // printf("fw update offset: %02x\r\n", update_state.offset);
+      tool_seen = true;
+      if (update_state.offset == 0)
+      {
+        multicore_lockout_start_blocking();
+        pfb_initialize_download_slot();
+        multicore_lockout_end_blocking();
+      }
+      break;
+    }
+    case ReportId::ReportIdConfigInfo:
+      lastKeepAlive = millis();
+      tool_seen = true;
+      start = 0;
+      write_config_info(buffer, bufsize);
+      break;
+    case ReportId::ReportIdLoaded:
+      lastKeepAlive = millis();
+      tool_seen = true;
+      just_loaded = true;
+      if (!debug_enabled)
+      {
+        initDebug();
+        debug_enabled = true;
+      }
+      break;
+    case ReportId::ReportIdKeepalive:
+      if (!ConfigManager::instance().is_working())
+      {
+        // ignore keepalives until we are ready
+        lastKeepAlive = millis();
+        tool_seen = true;
+      }
+      break;
+    case ReportId::ReportIdBootloader:
+      reset_usb_boot(0, 0);
+      break;
+    case ReportId::ReportIdCommand:
+    {
+      tool_seen = true;
+      proto_Command cmd;
+      pb_istream_t inputStream = pb_istream_from_buffer(buffer, bufsize);
+      if (!pb_decode_delimited(&inputStream, proto_Command_fields, &cmd))
+      {
+        printf("Didn't decode cmd?\r\n");
+        break;
+      }
+      handle_command(cmd);
+      break;
+    }
+    }
+  }
+}
+
+bool encode_active_profiles(pb_ostream_t *stream, const pb_field_t *field, void *const *arg)
+{
+  bool ok = true;
+  ProfileManager::instance().for_each_active_profile([stream, field, &ok](uint32_t profile_id, const auto &profile)
+                                                     {
+    (void)profile;
+    if (!ok)
+      return;
+    if (!pb_encode_tag_for_field(stream, field))
+    {
+      ok = false;
+      return;
+    }
+
+    if (!pb_encode_varint(stream, profile_id))
+    {
+      ok = false;
+    } });
+  return ok;
+}
+
+uint16_t HIDConfigDevice::get_report(uint8_t report_id, hid_report_type_t report_type, uint8_t *buffer, uint16_t reqlen)
+{
+  (void)report_id;
+  (void)report_type;
+  (void)buffer;
+  (void)reqlen;
+  if (report_type != HID_REPORT_TYPE_FEATURE)
+  {
+    return 0;
+  }
+
+  switch (report_id)
+  {
+  case ReportId::ReportIdConfig:
+  {
+    buffer[0] = report_id;
+    buffer++;
+    uint32_t ret = copy_config(buffer, start);
+    start += ret;
+    return ret + 1;
+  }
+  case ReportId::ReportIdGetVersion:
+  {
+    buffer[0] = report_id;
+    memcpy(buffer + 1, version, sizeof(version));
+    return sizeof(version) + 1;
+  }
+  case ReportId::ReportIdGetType:
+  {
+    buffer[0] = report_id;
+    memcpy(buffer + 1, type, sizeof(type));
+    return sizeof(type) + 1;
+  }
+  case ReportId::ReportIdGetActiveProfiles:
+  {
+    buffer[0] = report_id;
+    buffer++;
+    auto stream = pb_ostream_from_buffer(buffer, reqlen - 1);
+    proto_GetActiveProfiles resp = proto_GetActiveProfiles_init_zero;
+    resp.profiles.funcs.encode = encode_active_profiles;
+    if (!pb_encode_delimited(&stream, proto_GetActiveProfiles_fields, &resp))
+      return 1;
+    return 64;
+  }
+  case ReportId::ReportIdConfigInfo:
+    buffer[0] = report_id;
+    buffer++;
+    start = 0;
+    return copy_config_info(buffer) + 1;
+  }
+  return 0;
+}
+
+bool HIDConfigDevice::tool_closed()
+{
+  auto dev = HIDConfigDevice::instance;
+  if (!dev || !dev->tool_seen || ConfigManager::instance().is_working())
+  {
+    return true;
+  }
+  return millis() - dev->lastKeepAlive > 1000 && !dev->processing;
+}
+
+bool HIDConfigDevice::send_event(proto_Event event, bool now)
+{
+  auto dev = HIDConfigDevice::instance;
+  if (tool_closed())
+  {
+    return false;
+  }
+  dev->processing = true;
+  // flush queue if overflowing or event is important
+  while ((dev->list.event_count >= TU_ARRAY_SIZE(dev->list.event) || (dev->list.event_count && now)) && !tool_closed())
+  {
+    dev->process_events();
+    tud_task();
+  }
+  // tool_closed() can flip true mid-loop above (it depends on the processing flag we just
+  // set), leaving the queue still full - drop the event instead of writing past the array
+  bool sent = false;
+  if (dev->list.event_count < TU_ARRAY_SIZE(dev->list.event))
+  {
+    dev->list.event[dev->list.event_count++] = event;
+    sent = true;
+  }
+  // flush queue if event is important
+  while (now && dev->list.event_count && !tool_closed())
+  {
+    dev->process_events();
+    tud_task();
+  }
+  dev->lastKeepAlive = millis();
+  dev->processing = false;
+  if (!sent)
+  {
+    return false;
+  }
+  return true;
+}
+
+void HIDConfigDevice::reset_keepalive()
+{
+  auto dev = HIDConfigDevice::instance;
+  dev->lastKeepAlive = 0;
+  dev->tool_seen = false;
+  dev->selected_profile = 0;
+  dev->profile_selected = false;
+  dev->profile_changed = false;
+}
+
+std::shared_ptr<HIDConfigDevice> HIDConfigDevice::instance = std::make_shared<HIDConfigDevice>();

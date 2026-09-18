@@ -1,0 +1,250 @@
+syntax = "proto2";
+
+package proto;
+import "enums.proto";
+import "input_enums.proto";
+message CycleInput {
+  required int32 deviceid = 1;
+  optional Input input = 2;
+  optional Input inputReverse = 3;
+}
+message ToggleInput {
+  required int32 deviceid = 1;
+  optional Input input = 2;
+}
+message GPIOInput {
+  required int32 pin = 1;
+  required PinMode pinMode = 2;
+  required bool analog = 3;
+}
+message MatrixInput {
+  required int32 deviceid = 1;
+  required int32 pin = 2;
+  required int32 outputPin = 3;
+}
+message ADS1115Input {
+  required int32 deviceid = 1;
+  required int32 channel = 2;
+}
+message MultiplexerInput {
+  required int32 deviceid = 1;
+  required int32 channel = 2;
+}
+message AccelerometerInput {
+  required int32 deviceid = 1;
+  required AccelerometerInputType type = 2;
+}
+
+message MPR121Input {
+  required int32 deviceid = 1;
+  required int32 pin = 2;
+  required Mpr121PinMode mode = 3;
+  required PinMode pinMode = 4;
+}
+
+
+message FixedInput { required int32 value = 1; }
+
+message WiiAxisInput {
+  required int32 deviceid = 1;
+  required WiiAxisType axis = 2;
+}
+
+message WiiButtonInput {
+  required int32 deviceid = 1;
+  required WiiButtonType button = 2;
+}
+
+message CrkdNeckButtonInput {
+  required int32 deviceid = 1;
+  required CrkdNeckButtonType button = 2;
+}
+
+message CrkdDrumAxisInput {
+  required int32 deviceid = 1;
+  required CrkdDrumAxisType axis = 2;
+}
+
+message Gh5NeckButtonInput {
+  required int32 deviceid = 1;
+  required Gh5NeckButtonType button = 2;
+}
+
+message VTechGuitarIOExpanderInput {
+  required int32 deviceid = 1;
+  required int32 button = 2;
+}
+
+message MouseAxisInput {
+  required int32 deviceid = 1;
+  required MouseAxisType axis = 2;
+}
+
+message MouseButtonInput {
+  required int32 deviceid = 1;
+  required MouseButtonType button = 2;
+}
+ 
+message KeyboardKeyInput {
+  required int32 deviceid = 1;
+  required int32 key = 2;
+}
+
+message ShortcutInput {
+  repeated Input inputs = 1;
+}
+message HeldInput {
+  required Input input = 1;
+  required int32 time = 2;
+}
+
+
+message PS2AxisInput {
+  required int32 deviceid = 1;
+  required PS2AxisType axis = 2;
+}
+
+message PS2ButtonInput {
+  required int32 deviceid = 1;
+  required PS2ButtonType button = 2;
+}
+
+message USBButtonInput {
+  required int32 deviceid = 1;
+  required Output button = 2;
+}
+
+message USBAxisInput {
+  required int32 deviceid = 1;
+  required Output axis = 2;
+}
+
+message MidiNoteInput { 
+  required int32 note = 2; 
+  required int32 channel = 3; 
+}
+
+message MidiControlChangeInput { 
+  required int32 cc = 2; 
+  required int32 channel = 3;
+}
+
+message MidiPitchBendInput { 
+  required int32 channel = 2;
+}
+message MidiProGuitarButtonInput { 
+  required ProGuitarMidiButtonType button = 2; 
+}
+
+message MidiProGuitarAxisInput { 
+  required ProGuitarAxisType axis = 2; 
+}
+message ProtarNeckAxisInput {
+  required int32 deviceid = 1;
+  required ProGuitarNeckAxisType axis = 2;
+}
+message ProtarNeckButtonInput {
+  required int32 deviceid = 1;
+  required ProGuitarNeckButtonType button = 2;
+}
+
+message MidiInput {
+  required int32 deviceid = 1;
+  oneof input {
+    MidiNoteInput midiNote = 4;
+    MidiControlChangeInput midiControlChange = 5;
+    MidiPitchBendInput midiPitchBend = 6;
+    MidiProGuitarButtonInput midiProGuitarButton = 22;
+    MidiProGuitarAxisInput midiProGuitarAxis = 23;
+  }
+}
+
+message Input {
+  oneof input {
+    GPIOInput gpio = 1;
+    FixedInput fixed = 2;
+    MPR121Input mpr121 = 3;
+    MidiInput midi = 4;
+    MouseAxisInput mouseAxis = 7;
+    MouseButtonInput mouseButton = 8;
+    WiiAxisInput wiiAxis = 9;
+    WiiButtonInput wiiButton = 10;
+    KeyboardKeyInput key = 11;
+    CrkdNeckButtonInput crkd = 12;
+    ShortcutInput shortcut = 13;
+    ADS1115Input ads1115 = 14;
+    AccelerometerInput accelerometer = 15;
+    Gh5NeckButtonInput gh5Neck = 16;
+    PS2AxisInput ps2Axis = 17;
+    PS2ButtonInput ps2Button = 18;
+    USBButtonInput usbButton = 19;
+    USBAxisInput usbAxis = 20;
+    MultiplexerInput multiplexer = 21;
+    ProtarNeckAxisInput protarNeckAxis = 24;
+    ProtarNeckButtonInput protarNeckButton = 25;
+    VTechGuitarIOExpanderInput vtechExpander = 28;
+    HeldInput held = 29;
+    MatrixInput matrix = 30;
+    CrkdDrumAxisInput crkdDrum = 31;
+    CycleInput cycle = 32;
+    ToggleInput toggle = 33;
+  }
+}
+message InputActivationTrigger {
+  required Input input = 1;
+  optional bool inverted = 2;
+  optional AnalogToDigitalTriggerType trigger = 3;
+  optional int32 triggerValue = 4;
+  optional int32 maxTriggerValue = 5;
+}
+
+message Output {
+  oneof mapping {
+    GamepadButtonType gamepadButton = 1;
+    GamepadAxisType gamepadAxis = 2;
+    GuitarHeroGuitarButtonType ghButton = 3;
+    GuitarHeroGuitarAxisType ghAxis = 4;
+    RockBandGuitarButtonType rbButton = 5;
+    RockBandGuitarAxisType rbAxis = 6;
+    GuitarHeroDrumsAxisType ghDrumAxis = 8;
+    RockBandDrumsButtonType rbDrumButton = 9;
+    RockBandDrumsAxisType rbDrumAxis = 10;
+    GuitarHeroLiveGuitarButtonType ghlButton = 11;
+    GuitarHeroLiveGuitarAxisType ghlAxis = 12;
+    ProGuitarButtonType proButton = 13;
+    ProGuitarAxisType proAxis = 14;
+    DJHTurntableButtonType djhButton = 15;
+    DJHTurntableAxisType djhAxis = 16;
+    DJMaxTurntableButtonType djMaxButton = 17;
+    DJMaxTurntableAxisType djMaxAxis = 18;
+    ProjectDivaAxisType divaAxis = 20;
+    GuitarFreaksButtonType gfButton = 22;
+    GuitarHeroArcadeAxisType ghaAxis = 23;
+    GuitarHeroArcadeButtonType ghaButton = 24;
+    MouseAxisType mouseAxis = 25;
+    MouseButtonType mouseButton = 26;
+    int32 keycode = 27;
+    int32 proKeySingle = 28;
+    int32 proKeyMultiple = 29;
+    ProKeyboardAxisType proKeyboardAxis = 30;
+    ProKeyboardButtonType proKeyboardButton = 31;
+  }
+}
+
+message Mapping {
+  required Output mapping = 1;
+  required Input input = 50;
+  optional bool inverted = 51;
+  optional Input pressureInput = 52; // if there is no pressureInput, then set the pressures to max when the button is pressed
+  optional AnalogToDigitalTriggerType trigger = 53;
+  optional int32 pressed = 54;
+  optional int32 released = 55;
+  optional int32 min = 56;
+  optional int32 max = 57;
+  optional int32 center = 58;
+  optional int32 deadzone = 59;
+  optional int32 triggerValue = 60;
+  optional uint32 debounce = 61;
+  optional int32 maxTriggerValue = 62;
+  optional bool peakBased = 63;
+}

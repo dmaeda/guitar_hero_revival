@@ -1,0 +1,73 @@
+#pragma once
+#include "input.hpp"
+#include "input.pb.h"
+#include "devices/base.hpp"
+#include "devices/midi.hpp"
+#include <memory>
+class MidiNoteInput : public Input
+{
+public:
+    MidiNoteInput(proto_MidiNoteInput input, std::shared_ptr<MidiDevice> device);
+    bool tick_digital();
+    uint16_t tick_analog();
+    bool consumes_events() const override { return true; }
+    bool consume_event(uint16_t &value) override;
+    MidiNoteInput* as_midi_note() override { return this; }
+    uint8_t channel() const { return m_input.channel; }
+    uint8_t note() const { return m_input.note; }
+    std::shared_ptr<MidiDevice> device() const { return m_device; }
+
+private:
+    void setup();
+    proto_MidiNoteInput m_input;
+    std::shared_ptr<MidiDevice> m_device;
+    uint16_t m_last_event_sequence = 0;
+};
+class MidiControlChangeInput : public Input
+{
+public:
+    MidiControlChangeInput(proto_MidiControlChangeInput input, std::shared_ptr<MidiDevice> device);
+    bool tick_digital();
+    uint16_t tick_analog();
+
+private:
+    void setup();
+    proto_MidiControlChangeInput m_input;
+    std::shared_ptr<MidiDevice> m_device;
+};
+class MidiPitchBendInput : public Input
+{
+public:
+    MidiPitchBendInput(proto_MidiPitchBendInput input, std::shared_ptr<MidiDevice> device);
+    bool tick_digital();
+    uint16_t tick_analog();
+
+private:
+    void setup();
+    proto_MidiPitchBendInput m_input;
+    std::shared_ptr<MidiDevice> m_device;
+};
+class MidiProGuitarButtonInput : public Input
+{
+public:
+    MidiProGuitarButtonInput(proto_MidiProGuitarButtonInput input, std::shared_ptr<ProGuitarMidiDevice> device);
+    bool tick_digital();
+    uint16_t tick_analog();
+
+private:
+    void setup();
+    proto_MidiProGuitarButtonInput m_input;
+    std::shared_ptr<ProGuitarMidiDevice> m_device;
+};
+class MidiProGuitarAxisInput : public Input
+{
+public:
+    MidiProGuitarAxisInput(proto_MidiProGuitarAxisInput input, std::shared_ptr<ProGuitarMidiDevice> device);
+    bool tick_digital();
+    uint16_t tick_analog();
+
+private:
+    void setup();
+    proto_MidiProGuitarAxisInput m_input;
+    std::shared_ptr<ProGuitarMidiDevice> m_device;
+};

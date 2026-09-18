@@ -1,0 +1,29 @@
+#include "pico/stdlib.h"
+#include "pico/binary_info.h"
+#include "devices/debug.hpp"
+#include "events.pb.h"
+#include "main.hpp"
+#include "stdio.h"
+#include "config/config.hpp"
+DebugDevice::DebugDevice(proto_DebugDevice device, uint16_t id) : Device(id), m_device(device)
+{
+    bi_decl(bi_2pins_with_func(device.uart.tx, device.uart.rx, GPIO_FUNC_UART));
+    uart_inst = uart_get_instance(device.uart.block);
+    stdio_uart_init_full(uart_inst, device.uart.baudrate, device.uart.tx, device.uart.rx);
+    m_lastConnected = true;
+}
+
+void DebugDevice::begin()
+{
+}
+void DebugDevice::end(bool full)
+{
+}
+void DebugDevice::update(bool full_poll, bool send_events)
+{
+}
+
+bool DebugDevice::using_pin(uint8_t pin)
+{
+    return pin == m_device.uart.rx || pin == m_device.uart.tx;
+}

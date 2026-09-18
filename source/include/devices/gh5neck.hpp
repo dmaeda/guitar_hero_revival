@@ -1,0 +1,19 @@
+#pragma once
+#include "base.hpp"
+#include "device.pb.h"
+#include "guitar_hero_5_neck.hpp"
+class GH5NeckDevice : public Device
+{
+public:
+    ~GH5NeckDevice() {}
+    GH5NeckDevice(proto_GuitarHero5NeckDevice device, uint16_t id);
+    void begin();
+    void end(bool full);
+    void update(bool full_poll, bool send_events);
+    bool using_pin(uint8_t pin);
+    GuitarHero5Neck m_gh5_neck;
+
+private:
+    proto_GuitarHero5NeckDevice m_device;
+    uint32_t m_last_value = 0;
+};

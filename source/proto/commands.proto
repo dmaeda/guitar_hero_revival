@@ -1,0 +1,46 @@
+syntax = "proto2";
+package proto;
+import "enums.proto";
+import "input_enums.proto";
+
+message SetProfileCommand {
+  required uint32 profileId = 1;
+  optional uint32 instanceId = 2;
+}
+
+message DetectPinCommand {
+  required PinDetectType detectType = 1;
+}
+
+message DetectMidiCommand {
+}
+
+message RebootCommand {
+
+}
+message DisconnectCommand {
+
+}
+message ScanCommand {
+
+}
+message SaveCommand {
+
+}
+message CrkdCalibrationUpdateCommand {
+  required uint32 id = 1;
+  required CrkdDrumCalibrationType type = 2;
+  required CrkdDrumAxisType axisType = 3;
+  required uint32 val = 4;
+}
+message Command {
+    oneof command {
+        SetProfileCommand setProfile = 1;
+        DetectPinCommand detectPin = 2;
+        RebootCommand reboot = 3;
+        CrkdCalibrationUpdateCommand crkdDrum = 4;
+        DisconnectCommand disconnect = 5;
+        ScanCommand scan = 6;
+        SaveCommand save = 7;
+    }
+}

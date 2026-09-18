@@ -1,0 +1,221 @@
+syntax = "proto2";
+package proto;
+
+import "input.proto";
+import "enums.proto";
+import "device.proto";
+
+message ProfileOpts {
+  required uint32 uid = 1; 
+  required FaceButtonMappingMode faceButtonMappingMode = 2;
+  required string name = 5;
+  required SubType deviceToEmulate = 6;
+  optional bool xinputOnWindows = 10;
+  optional bool invertYAxisHid = 11;
+  optional bool ps4OrPs5Mode = 12;
+  optional bool supportsSlider = 13;
+  optional bool cymbalGlitchFix = 14;
+}
+
+message Profile {
+  required ProfileOpts opts = 1;
+  repeated ProfileAssignment assignments = 3;
+  repeated Mapping mappings = 4;
+  repeated Led leds = 9;
+}
+message InputLedMapping {
+  required Input input = 1;
+  optional int32 min = 2;
+  optional int32 max = 3;
+  optional ReactiveRgbPatternType pattern = 4;
+}
+message PatternLedMapping {
+  required RgbPatternType pattern = 1;
+  required int32 speed = 2;
+  required int32 brightness = 3;
+}
+message StaticLedMapping {
+
+}
+message RGBLedDevice {
+  required int32 deviceId = 1;
+  required int32 startR = 2;
+  required int32 startG = 3;
+  required int32 startB = 4;
+  required int32 startW = 5;
+  required int32 endR = 6;
+  required int32 endG = 7;
+  required int32 endB = 8;
+  required int32 endW = 9;
+  repeated uint32 activeLed = 10;
+  required bool hasStart = 11;
+}
+message DMXLedDevice {
+  required int32 deviceId = 1;
+  required int32 channel = 2;
+}
+message GpioLedDevice {
+  required int32 pin = 1;
+  required bool analog = 3;
+}
+message VTechGuitarIOExpanderLedDevice {
+  required int32 deviceId = 1;
+  required int32 activeLed = 2;
+}
+message STP16CPCLedDevice {
+  required int32 deviceId = 1;
+  repeated int32 activeLed = 2;
+}
+message LedDevice {
+  oneof device {
+    RGBLedDevice rgb = 4;
+    GpioLedDevice gpio = 5;
+    STP16CPCLedDevice stp16 = 6;
+    VTechGuitarIOExpanderLedDevice vtechExpander = 7;
+    DMXLedDevice dmx = 8;
+  }
+}
+message LedMapping {
+  oneof led {
+    InputLedMapping inputMapping = 1;
+    PatternLedMapping patternMapping = 2;
+    StaticLedMapping staticMapping = 3;
+  }
+}
+message Led {
+    required LedDevice device = 1;
+    required LedMapping mapping = 2;
+}
+
+message SpecificUsbDevice {
+  required uint32 vid = 1;
+  required uint32 pid = 2;
+}
+
+message UsbDeviceAssignment {
+  optional ConsoleType consoleType = 1;
+  optional ConsoleMode forcedType = 2;
+  optional bool xinputOnWindows = 3;
+  optional bool ps4OrPs5Mode = 4;
+}
+
+message WiimoteAssignment {
+
+}
+message PSXAssignment {
+
+}
+
+message ProfileAssignmentInfo {
+  oneof assignment {
+    UsbDeviceAssignment consoleType = 4;
+    WiiExtType wiiExt = 5;
+    PS2ControllerType ps2Cnt = 6;
+    SubType usbType = 7;
+    SpecificUsbDevice usbDevice = 8;
+    InputActivationTrigger input = 10; // Input at startup
+    InputActivationTrigger inputAnyTime = 11; // Input at any time
+    uint32 copilotProfile = 12; // copilot another profile
+    uint32 midiChannel = 13;
+    BluetoothMode bluetooth = 14;
+    WiimoteAssignment wiiEmulation = 16;
+    PSXAssignment ps2Emulation = 17;
+  }
+}
+
+message ProfileAssignment {
+  repeated ProfileAssignmentInfo assignments = 1;
+}
+message GuiDevice {
+  required string label = 1;
+  required int32 pin = 2;
+  optional bool showToCustomer = 3;
+}
+message GuiLed {
+  required string label = 1;
+  required int32 deviceid = 2;
+  repeated uint32 activeLed = 3;
+  optional bool showToCustomer = 4;
+}
+message GuiMultiplexerDevice {
+  required string label = 1;
+  required int32 deviceid = 2;
+  required uint32 channel = 3;
+  optional bool showToCustomer = 4;
+}
+message GuiMatrixDevice {
+  required string label = 1;
+  required int32 deviceid = 2;
+  required uint32 inputPin = 3;
+  required uint32 outputPin = 4;
+  optional bool showToCustomer = 5;
+}
+message SellerConfig {
+  required bytes logo = 1;
+  required string name = 2;
+}
+message GuiConfig {
+  required int32 deviceid = 1;
+  oneof config {
+    GuiDevice label = 2;
+    SellerConfig seller = 3;
+    GuiLed ledLabel = 4;
+    GuiMultiplexerDevice multiplexerLabel = 5;
+    GuiMatrixDevice matrixLabel = 6;
+  }
+}
+
+message Config {
+  repeated Device devices = 2;
+  repeated Profile profiles = 3;
+  repeated GuiConfig guiConfig = 4;
+  optional bool syncCalibrations = 5;
+}
+
+message ConfigInfo {
+  required int32 dataSize = 1;
+  required int32 dataCrc = 2;
+  required int32 mainSize = 3;
+  required int32 auxSize = 4;
+  required int32 magic = 5;
+}
+
+message GetActiveProfiles {
+  repeated int32 profiles = 1;
+}
+
+message GetVersion {
+  required string version = 1;
+}
+
+message GetType {
+  required string type = 1;
+}
+message FirmwareUpdate {
+  required int32 firmwareSize = 1;
+  required int32 offset = 2;
+  required int32 chunkOffset = 3;
+  required int32 chunkSize = 4;
+}
+message CyclingInputState {
+  required int32 id = 1;
+  required int32 state = 2;
+}
+
+message ToggleInputState {
+  required int32 id = 1;
+  required bool state = 2;
+}
+
+message BluetoothPairingState {
+  required int32 id = 1;
+  required bytes macAddress = 2;
+  required string name = 3;
+  required bool ble = 4;
+}
+
+message AuxConfigBlock {
+  repeated CyclingInputState states = 1;
+  repeated ToggleInputState toggleStates = 2;
+  repeated BluetoothPairingState bluetoothStates = 3;
+}

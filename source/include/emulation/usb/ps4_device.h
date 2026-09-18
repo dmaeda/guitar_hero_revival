@@ -1,0 +1,28 @@
+
+#pragma once
+#include "emulation/usb/usb_descriptors.h"
+#include "hid_device.h"
+
+#include "tusb.h"
+
+#define PS4_LED_RUMBLE_ID 0x05
+#define PS4_GAMEPAD 0
+#define PS4_GUITAR 1
+#define PS4_DRUMS 2
+#define PS4_FIGHTSTICK 7 
+
+class PS4GamepadDevice : public HIDDevice
+{
+public:
+    PS4GamepadDevice();
+    void initialize();
+    void process(bool full_poll, bool send_events);
+    size_t compatible_section_descriptor(uint8_t *desc, size_t remaining);
+    size_t config_descriptor(uint8_t *desc, size_t remaining);
+    size_t device_name(uint8_t idx, char *desc);
+    void device_descriptor(tusb_desc_device_t *desc);
+    const uint8_t *report_descriptor();
+    uint16_t report_desc_len();
+    uint16_t get_report(uint8_t report_id, hid_report_type_t report_type, uint8_t *buffer, uint16_t reqlen);
+    void set_report(uint8_t report_id, hid_report_type_t report_type, uint8_t const *buffer, uint16_t bufsize);
+};

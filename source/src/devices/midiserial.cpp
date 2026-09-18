@@ -1,0 +1,31 @@
+#include "devices/midiserial.hpp"
+#include "events.pb.h"
+#include "main.hpp"
+#include "emulation/usb/hid_device.h"
+#include "config/config.hpp"
+MidiSerialDevice::MidiSerialDevice(const DeviceReloadState* state, proto_SerialMidiDevice device, uint16_t id) : MidiDevice(state, id, false), serial(this, device.uart.block, device.uart.tx, device.uart.rx, device.uart.baudrate), m_device(device)
+{
+}
+void MidiSerialDevice::begin()
+{
+}
+
+void MidiSerialDevice::end(bool full)
+{
+}
+void MidiSerialDevice::update(bool full_poll, bool send_events)
+{
+    serial.tick();
+    MidiDevice::update(full_poll, send_events);
+    if (m_lastConnected != serial.is_connected() || full_poll)
+    {
+        m_lastConnected = serial.is_connected();
+        proto_Event event = {which_event : proto_Event_device_tag, event : {device : {m_id, m_lastConnected}}};
+        HIDConfigDevice::send_event(event, true);
+    }
+}
+
+bool MidiSerialDevice::using_pin(uint8_t pin)
+{
+    return pin == m_device.uart.rx || pin == m_device.uart.tx;
+}

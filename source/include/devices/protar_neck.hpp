@@ -1,0 +1,26 @@
+#pragma once
+#include "base.hpp"
+#include "device.pb.h"
+#include "input_enums.pb.h"
+#include "protar_neck_device.hpp"
+#include <unordered_map>
+#include <memory>
+#include <set>
+
+class ProtarNeckDevice : public Device
+{
+public:
+    ~ProtarNeckDevice() {}
+    ProtarNeckDevice(proto_ProtarNeckDevice device, uint16_t id);
+    void begin();
+    void end(bool full);
+    void update(bool full_poll, bool send_events);
+    uint16_t read_axis(ProGuitarNeckAxisType type);
+    bool read_button(ProGuitarNeckButtonType type);
+    bool using_pin(uint8_t pin);
+
+private:
+    ProtarNeck m_controller;
+    proto_ProtarNeckDevice m_device;
+    uint32_t m_last_value = 0;
+};

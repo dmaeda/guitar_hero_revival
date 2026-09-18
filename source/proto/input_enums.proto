@@ -1,0 +1,514 @@
+syntax = "proto2";
+package proto;
+enum GamepadButtonType {
+  Gamepad_A = 1;
+  Gamepad_B = 2;
+  Gamepad_X = 3;
+  Gamepad_Y = 4;
+
+  Gamepad_Back = 5;
+  Gamepad_Start = 6;
+
+  Gamepad_Guide = 7;
+  Gamepad_Capture = 8;
+
+  Gamepad_LeftShoulder = 9;
+  Gamepad_RightShoulder = 10;
+
+  Gamepad_LeftThumbClick = 11;
+  Gamepad_RightThumbClick = 12;
+
+  Gamepad_DpadUp = 13;
+  Gamepad_DpadDown = 14;
+  Gamepad_DpadLeft = 15;
+  Gamepad_DpadRight = 16;
+}
+enum GamepadAxisType {
+  Gamepad_LeftStickX = 1;
+  Gamepad_LeftStickY = 2;
+  Gamepad_RightStickX = 3;
+  Gamepad_RightStickY = 4;
+
+  Gamepad_LeftTrigger = 5;
+  Gamepad_RightTrigger = 6;
+
+  Gamepad_AccelX = 7;
+  Gamepad_AccelY = 8;
+  Gamepad_AccelZ = 9;
+  Gamepad_Gyro = 10;
+}
+enum ProjectDivaAxisType {
+  ProjectDiva_Slider = 7;
+}
+enum GuitarFreaksButtonType {
+  GuitarFreaks_Red = 1;
+  GuitarFreaks_Green = 2;
+  GuitarFreaks_Blue = 3;
+
+  GuitarFreaks_Strum = 7;
+}
+enum GuitarHeroGuitarButtonType {
+  GuitarHeroGuitar_Green = 1;
+  GuitarHeroGuitar_Red = 2;
+  GuitarHeroGuitar_Yellow = 3;
+  GuitarHeroGuitar_Blue = 4;
+  GuitarHeroGuitar_Orange = 5;
+
+  GuitarHeroGuitar_TapGreen = 6;
+  GuitarHeroGuitar_TapRed = 7;
+  GuitarHeroGuitar_TapYellow = 8;
+  GuitarHeroGuitar_TapBlue = 9;
+  GuitarHeroGuitar_TapOrange = 10;
+  GuitarHeroGuitar_Pedal = 18;
+}
+enum GuitarHeroGuitarAxisType {
+  GuitarHeroGuitar_Whammy = 1;
+  GuitarHeroGuitar_Tilt = 2;
+}
+
+enum GuitarHeroArcadeButtonType {
+  GuitarHeroArcade_Green = 1;
+  GuitarHeroArcade_Red = 2;
+  GuitarHeroArcade_Yellow = 3;
+  GuitarHeroArcade_Blue = 4;
+  GuitarHeroArcade_Orange = 5;
+  GuitarHeroArcade_Side = 6;
+}
+enum GuitarHeroArcadeAxisType {
+  GuitarHeroArcade_Tilt = 1;
+}
+enum GuitarHeroLiveGuitarButtonType {
+  GuitarHeroLiveGuitar_White1 = 1;
+  GuitarHeroLiveGuitar_White2 = 2;
+  GuitarHeroLiveGuitar_White3 = 3;
+  GuitarHeroLiveGuitar_Black1 = 4;
+  GuitarHeroLiveGuitar_Black2 = 5;
+  GuitarHeroLiveGuitar_Black3 = 6;
+  GuitarHeroLiveGuitar_GHTV = 7;
+  GuitarHeroLiveGuitar_StrumUp = 8;
+  GuitarHeroLiveGuitar_StrumDown = 9;
+}
+enum GuitarHeroLiveGuitarAxisType {
+  GuitarHeroLiveGuitar_Whammy = 1;
+  GuitarHeroLiveGuitar_Tilt = 2;
+}
+enum RockBandGuitarButtonType {
+  RockBandGuitar_Green = 1;
+  RockBandGuitar_Red = 2;
+  RockBandGuitar_Yellow = 3;
+  RockBandGuitar_Blue = 4;
+  RockBandGuitar_Orange = 5;
+
+  RockBandGuitar_SoloGreen = 6;
+  RockBandGuitar_SoloRed = 7;
+  RockBandGuitar_SoloYellow = 8;
+  RockBandGuitar_SoloBlue = 9;
+  RockBandGuitar_SoloOrange = 10;
+  RockBandGuitar_Pedal = 18;
+}
+enum RockBandGuitarAxisType {
+  RockBandGuitar_Whammy = 1;
+  RockBandGuitar_Tilt = 2;
+  RockBandGuitar_Pickup = 3;
+}
+enum RockBandDrumsButtonType {
+  RockBandDrums_Kick1Pedal = 12;
+  RockBandDrums_Kick2Pedal = 13;
+}
+enum RockBandDrumsAxisType {
+  RockBandDrums_RedPad = 1;
+  RockBandDrums_YellowPad = 2;
+  RockBandDrums_BluePad = 3;
+  RockBandDrums_GreenPad = 4;
+  RockBandDrums_YellowCymbal = 5;
+  RockBandDrums_BlueCymbal = 6;
+  RockBandDrums_GreenCymbal = 7;
+}
+enum GuitarHeroDrumsAxisType {
+  GuitarHeroDrums_RedPad = 1;
+  GuitarHeroDrums_YellowPad = 2;
+  GuitarHeroDrums_BluePad = 3;
+  GuitarHeroDrums_OrangePad = 4;
+  GuitarHeroDrums_GreenPad = 5;
+  GuitarHeroDrums_KickPedal = 6;
+}
+enum DJHTurntableButtonType {
+  DJHTurntable_LeftBlue = 1;
+  DJHTurntable_LeftRed = 2;
+  DJHTurntable_LeftGreen = 3;
+  DJHTurntable_RightBlue = 4;
+  DJHTurntable_RightRed = 5;
+  DJHTurntable_RightGreen = 6;
+}
+enum DJHTurntableAxisType {
+  DJHTurntable_LeftVelocity = 1;
+  DJHTurntable_RightVelocity = 2;
+  DJHTurntable_EffectsKnob = 3;
+  DJHTurntable_Crossfader = 4;
+}
+enum DJMaxTurntableButtonType {
+  DJMaxTurntable_B1 = 1;
+  DJMaxTurntable_B2 = 2;
+  DJMaxTurntable_B3 = 3;
+  DJMaxTurntable_B4 = 4;
+  DJMaxTurntable_B5 = 5;
+  DJMaxTurntable_B6 = 6;
+  DJMaxTurntable_B7 = 7;
+  DJMaxTurntable_B8 = 8;
+  DJMaxTurntable_B9 = 9;
+  DJMaxTurntable_E1 = 10;
+  DJMaxTurntable_E2 = 11;
+  DJMaxTurntable_E3 = 12;
+  DJMaxTurntable_E4 = 13;
+}
+enum DJMaxTurntableAxisType {
+  DJMaxTurntable_LeftVelocity = 1;
+  DJMaxTurntable_RightVelocity = 2;
+}
+
+enum PopNMusicButtonType {
+  PopNMusic_Button1 = 1;
+  PopNMusic_Button2 = 2;
+  PopNMusic_Button3 = 3;
+  PopNMusic_Button4 = 4;
+  PopNMusic_Button5 = 5;
+  PopNMusic_Button6 = 6;
+  PopNMusic_Button7 = 7;
+  PopNMusic_Button8 = 8;
+  PopNMusic_Button9 = 9;
+}
+enum PopNMusicAxisType {
+  PopNMusic_LeftStickX = 1;
+  PopNMusic_LeftStickY = 2;
+}
+
+enum ProGuitarButtonType {
+  ProGuitar_Green = 12;
+  ProGuitar_Red = 13;
+  ProGuitar_Yellow = 14;
+  ProGuitar_Blue = 15;
+  ProGuitar_Orange = 16;
+  ProGuitar_SoloGreen = 17;
+  ProGuitar_SoloRed = 18;
+  ProGuitar_SoloYellow = 19;
+  ProGuitar_SoloBlue = 20;
+  ProGuitar_SoloOrange = 21;
+  ProGuitar_Pedal = 22;
+}
+
+enum ProGuitarAxisType {
+  ProGuitar_LowEFret = 1;
+  ProGuitar_AFret = 2;
+  ProGuitar_DFret = 3;
+  ProGuitar_GFret = 4;
+  ProGuitar_BFret = 5;
+  ProGuitar_HighEFret = 6;
+  ProGuitar_LowEFretVelocity = 7;
+  ProGuitar_AFretVelocity = 8;
+  ProGuitar_DFretVelocity = 9;
+  ProGuitar_GFretVelocity = 10;
+  ProGuitar_BFretVelocity = 11;
+  ProGuitar_HighEFretVelocity = 12;
+  ProGuitar_Tilt = 15;
+  ProGuitar_AutoCalibrationMicrophone = 16;
+  ProGuitar_AutoCalibrationLight = 17;
+}
+
+enum MidiTriggerType {
+  Normal = 1;
+  Drum = 2;
+}
+
+enum AnalogToDigitalTriggerType {
+  JoyHigh = 1;
+  JoyLow = 2;
+  Exact = 3;
+  Range = 4;
+}
+
+enum MouseAxisType {
+  Mouse_MoveX = 1;
+  Mouse_MoveY = 2;
+  Mouse_ScrollX = 3;
+  Mouse_ScrollY = 4;
+}
+
+enum MouseButtonType {
+  Mouse_Left = 1;
+  Mouse_Middle = 2;
+  Mouse_Right = 3;
+}
+
+enum WiiAxisType {
+  WiiAxisClassicLeftStickX= 1;
+  WiiAxisClassicLeftStickY= 2;
+  WiiAxisClassicRightStickX= 3;
+  WiiAxisClassicRightStickY= 4;
+  WiiAxisClassicLeftTrigger= 5;
+  WiiAxisClassicRightTrigger= 6;
+  WiiAxisDrumJoystickX= 7;
+  WiiAxisDrumJoystickY= 8;
+  WiiAxisGuitarJoystickX = 9;
+  WiiAxisGuitarJoystickY= 10;
+  WiiAxisGuitarWhammy= 11;
+  WiiAxisNunchukStickX= 12;
+  WiiAxisNunchukStickY= 13;
+  WiiAxisNunchukAccelerationX= 14;
+  WiiAxisNunchukAccelerationY= 15;
+  WiiAxisNunchukAccelerationZ= 16;
+  WiiAxisNunchukRotationPitch= 17;
+  WiiAxisNunchukRotationRoll= 18;
+  WiiAxisDjTurntableLeft= 19;
+  WiiAxisDjTurntableRight= 20;
+  WiiAxisDjCrossfadeSlider= 21;
+  WiiAxisDjEffectDial= 22;
+  WiiAxisDjStickX= 23;
+  WiiAxisDjStickY= 24;
+  WiiAxisUDrawPenX= 25;
+  WiiAxisUDrawPenY= 26;
+  WiiAxisUDrawPenPressure= 27;
+  WiiAxisDrawsomePenX= 28;
+  WiiAxisDrawsomePenY= 29;
+  WiiAxisDrawsomePenPressure= 30;
+}
+
+
+enum WiiButtonType {    
+  WiiButtonGuitarGreen= 1;
+  WiiButtonGuitarRed= 2;
+  WiiButtonGuitarYellow= 3;
+  WiiButtonGuitarBlue= 4;
+  WiiButtonGuitarOrange= 5;
+  WiiButtonGuitarTapGreen= 6;
+  WiiButtonGuitarTapRed= 7;
+  WiiButtonGuitarTapYellow= 8;
+  WiiButtonGuitarTapBlue= 9;
+  WiiButtonGuitarTapOrange= 10;
+  WiiButtonGuitarMinus= 11;
+  WiiButtonGuitarPlus= 12;
+  WiiButtonGuitarStrumUp= 13;
+  WiiButtonGuitarStrumDown= 14;
+  WiiButtonGuitarPedal= 15;
+  WiiButtonDrumMinus = 16;
+  WiiButtonDrumPlus= 17;
+  WiiButtonNunchukC = 18;
+  WiiButtonNunchukZ= 19;
+  WiiButtonUDrawPenClick= 20;
+  WiiButtonUDrawPenButton1= 21;
+  WiiButtonUDrawPenButton2= 22;
+  WiiButtonTaTaConLeftDrumRim= 23;
+  WiiButtonTaTaConLeftDrumCenter= 24;
+  WiiButtonTaTaConRightDrumRim= 25;
+  WiiButtonTaTaConRightDrumCenter= 26;
+  WiiButtonDjHeroEuphoria= 27;
+  WiiButtonDjHeroLeftGreen= 28;
+  WiiButtonDjHeroLeftRed= 29;
+  WiiButtonDjHeroLeftBlue= 30;
+  WiiButtonDjHeroRightGreen= 31;
+  WiiButtonDjHeroRightRed= 32;
+  WiiButtonDjHeroRightBlue= 33;
+  WiiButtonDjHeroMinus= 34;
+  WiiButtonDjHeroPlus= 35;
+  WiiButtonClassicA= 36;
+  WiiButtonClassicB= 37;
+  WiiButtonClassicX= 38;
+  WiiButtonClassicY= 39;
+  WiiButtonClassicDPadUp= 40;
+  WiiButtonClassicDPadDown= 41;
+  WiiButtonClassicDPadLeft= 42;
+  WiiButtonClassicDPadRight= 43;
+  WiiButtonClassicZl= 44;
+  WiiButtonClassicZr= 45;
+  WiiButtonClassicLt= 46;
+  WiiButtonClassicRt= 47;
+  WiiButtonClassicPlus= 48;
+  WiiButtonClassicMinus= 49;
+  WiiButtonClassicHome= 50;
+}
+
+enum PS2AxisType {
+  PS2AxisGunConHSync = 1;
+  PS2AxisGunConVSync = 2;
+  PS2AxisMouseX = 3;
+  PS2AxisMouseY = 4;
+  PS2AxisNegConTwist = 5;
+  PS2AxisNegConI = 6;
+  PS2AxisNegConIi = 7;
+  PS2AxisNegConL = 8;
+  PS2AxisJogConWheel = 9;
+  PS2AxisGuitarWhammy = 10;
+  PS2AxisLeftStickX = 12;
+  PS2AxisLeftStickY = 13;
+  PS2AxisRightStickX = 14;
+  PS2AxisRightStickY = 15;
+  PS2AxisDualshock2L1 = 16;
+  PS2AxisDualshock2R1 = 17;
+  PS2AxisDualshock2RightButton = 18;
+  PS2AxisDualshock2LeftButton = 19;
+  PS2AxisDualshock2UpButton = 20;
+  PS2AxisDualshock2DownButton = 21;
+  PS2AxisDualshock2Triangle = 22;
+  PS2AxisDualshock2Circle = 23;
+  PS2AxisDualshock2Cross = 24;
+  PS2AxisDualshock2Square = 25;
+  PS2AxisDualshock2L2 = 26;
+  PS2AxisDualshock2R2 = 27;
+}
+
+
+enum PS2ButtonType {    
+ PS2ButtonMouseLeft = 1;
+  PS2ButtonMouseRight = 2;
+  PS2ButtonNegConA = 3;
+  PS2ButtonNegConB = 4;
+  PS2ButtonNegConStart = 5;
+  PS2ButtonNegConR = 6;
+  PS2ButtonGuitarGreen = 7;
+  PS2ButtonGuitarRed = 8;
+  PS2ButtonGuitarYellow = 9;
+  PS2ButtonGuitarBlue = 10;
+  PS2ButtonGuitarOrange = 11;
+  PS2ButtonGuitarStrumUp = 12;
+  PS2ButtonGuitarStrumDown = 13;
+  PS2ButtonGuitarDpadUp = 14;
+  PS2ButtonGuitarDpadDown = 15;
+  PS2ButtonGuitarDpadLeft = 16;
+  PS2ButtonGuitarDpadRight = 17;
+  PS2ButtonGuitarSelect = 18;
+  PS2ButtonGuitarStart = 19;
+  PS2ButtonGuitarTilt = 20;
+  PS2ButtonGuitarTapGreen = 21;
+  PS2ButtonGuitarTapRed = 22;
+  PS2ButtonGuitarTapYellow = 23;
+  PS2ButtonGuitarTapBlue = 24;
+  PS2ButtonGuitarTapOrange = 25;
+  PS2ButtonSelect = 26;
+  PS2ButtonL3 = 27;
+  PS2ButtonR3 = 28;
+  PS2ButtonStart = 29;
+  PS2ButtonDpadUp = 30;
+  PS2ButtonDpadRight = 31;
+  PS2ButtonDpadDown = 32;
+  PS2ButtonDpadLeft = 33;
+  PS2ButtonL2 = 34;
+  PS2ButtonR2 = 35;
+  PS2ButtonL1 = 36;
+  PS2ButtonR1 = 37;
+  PS2ButtonTriangle = 38;
+  PS2ButtonCircle = 39;
+  PS2ButtonCross = 40;
+  PS2ButtonSquare = 41;
+  PS2ButtonTaikoRimLeft = 42;
+  PS2ButtonTaikoRimRight = 43;
+  PS2ButtonTaikoCenterLeft = 44;
+  PS2ButtonTaikoCenterRight = 45;
+}
+
+enum CrkdNeckButtonType {
+  CrkdGreen = 1;
+  CrkdRed = 2;
+  CrkdYellow = 3;
+  CrkdBlue = 4;
+  CrkdOrange = 5;
+  CrkdDpadUp = 6;
+  CrkdDpadDown = 7;
+  CrkdDpadLeft = 8;
+  CrkdDpadRight = 9;
+  CrkdSoloGreen = 10;
+  CrkdSoloRed = 11;
+  CrkdSoloYellow = 12;
+  CrkdSoloBlue = 13;
+  CrkdSoloOrange = 14;
+}
+
+enum CrkdDrumAxisType {
+  CrkdRedPad = 1;
+  CrkdYellowPad = 2;
+  CrkdBluePad = 3;
+  CrkdGreenPad = 4;
+  CrkdYellowCymbal = 5;
+  CrkdBlueCymbal = 6;
+  CrkdGreenCymbal = 7;
+  CrkdKick1 = 8;
+  CrkdKick2 = 9;
+}
+
+enum Gh5NeckButtonType {
+  Gh5Green = 1;
+  Gh5Red = 2;
+  Gh5Yellow = 3;
+  Gh5Blue = 4;
+  Gh5Orange = 5;
+  Gh5TapGreen = 6;
+  Gh5TapRed = 7;
+  Gh5TapYellow = 8;
+  Gh5TapBlue = 9;
+  Gh5TapOrange = 10;
+}
+
+
+enum AccelerometerInputType {
+  AccelerometerX = 1;
+  AccelerometerY = 2;
+  AccelerometerZ = 3;
+  AccelerometerAdc1 = 4;
+  AccelerometerAdc2 = 5;
+  AccelerometerAdc3 = 6;
+}
+enum ProGuitarNeckButtonType {
+  ProGuitarNeckGreen = 1;
+  ProGuitarNeckRed = 2;
+  ProGuitarNeckYellow = 3;
+  ProGuitarNeckBlue = 4;
+  ProGuitarNeckOrange = 5;
+  ProGuitarNeckSoloGreen = 6;
+  ProGuitarNeckSoloRed = 7;
+  ProGuitarNeckSoloYellow = 8;
+  ProGuitarNeckSoloBlue = 9;
+  ProGuitarNeckSoloOrange = 10;
+}
+
+enum ProGuitarMidiButtonType {
+  ProGuitarMidi_A = 1;
+  ProGuitarMidi_B = 2;
+  ProGuitarMidi_X = 3;
+  ProGuitarMidi_Y = 4;
+
+  ProGuitarMidi_Back = 5;
+  ProGuitarMidi_Start = 6;
+
+  ProGuitarMidi_Guide = 7;
+
+  ProGuitarMidi_DpadUp = 8;
+  ProGuitarMidi_DpadDown = 9;
+  ProGuitarMidi_DpadLeft = 10;
+  ProGuitarMidi_DpadRight = 11;
+  ProGuitarMidi_Green = 12;
+  ProGuitarMidi_Red = 13;
+  ProGuitarMidi_Yellow = 14;
+  ProGuitarMidi_Blue = 15;
+  ProGuitarMidi_Orange = 16;
+  ProGuitarMidi_SoloGreen = 17;
+  ProGuitarMidi_SoloRed = 18;
+  ProGuitarMidi_SoloYellow = 19;
+  ProGuitarMidi_SoloBlue = 20;
+  ProGuitarMidi_SoloOrange = 21;
+  ProGuitarMidi_Pedal = 22;
+}
+
+enum ProGuitarNeckAxisType {
+  ProGuitarNeckLowEFret = 1;
+  ProGuitarNeckAFret = 2;
+  ProGuitarNeckDFret = 3;
+  ProGuitarNeckGFret = 4;
+  ProGuitarNeckBFret = 5;
+  ProGuitarNeckHighEFret = 6;
+}
+
+enum ProKeyboardAxisType {
+  ProKeyboardPedal = 1;
+  ProKeyboardTouchPad = 2;
+}
+enum ProKeyboardButtonType {
+  ProKeyboardOverdrive = 1;
+}

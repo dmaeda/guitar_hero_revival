@@ -1,0 +1,257 @@
+syntax = "proto2";
+package proto;
+enum ReportId {
+  option allow_alias = true;
+  ReportIdPs3Feature = 0;
+  ReportIdGamepad = 1;
+  ReportIdKeyboard = 2;
+  ReportIdMouse = 3;
+  ReportIdConsumer = 4;
+  ReportIdSantrollerCapabilities = 0x10;
+  ReportIdConfig = 0x22;
+  ReportIdConfigInfo = 0x23;
+  ReportIdLoaded = 0x24;
+  ReportIdKeepalive = 0x25;
+  ReportIdBootloader = 0x26;
+  ReportIdCommand = 0x27;
+  ReportIdGetActiveProfiles = 0x28;
+  ReportIdGetVersion = 0x29;
+  ReportIdUpdateFirmware = 0x30;
+  ReportIdUploadFirmware = 0x31;
+  ReportIdGetType = 0x32;
+  ReportIdPs301 = 0x01;
+  ReportIdPs302 = 0x02;
+  ReportIdPs3EE = 0xEE;
+  ReportIdPs3EF = 0xEF;
+  ReportIdPs3F2 = 0xF2;
+  ReportIdPs3F4 = 0xF4;
+  ReportIdPs3F5 = 0xF5;
+  ReportIdPs3F6 = 0xF6;
+  ReportIdPs3F7 = 0xF7;
+  ReportIdPs3F8 = 0xF8;
+  ReportIdPs4Feature = 0x03;
+  ReportIdPs405 = 0x05;
+  ReportIdPs4SetChallenge = 0xF0;
+  ReportIdPs4GetResponse = 0xF1;
+  ReportIdPs4GetAuthStatus = 0xF2;
+  ReportIdPs4GetAuthPageSize = 0xF3;
+  ReportIdPs502 = 0x02;
+  ReportIdPs5Feature = 0x03;
+  ReportIdPs5E0 = 0xE0;
+  ReportIdPs5SetChallenge = 0xF0;
+  ReportIdPs5GetResponse = 0xF1;
+  ReportIdPs5GetAuthStatus = 0xF2;
+  ReportSwitchOutput00 = 0;
+  ReportSwitchFeature = 1;
+  ReportSwitchOutput10 = 0x10;
+  ReportSwitchOutput21 = 0x21;
+  ReportSwitchOutput30 = 0x30;
+  ReportSwitchConfiguration = 0x80;
+  ReportSwitchInput = 0x81;
+  ReportSwitchOutput82 = 0x82;
+}
+
+enum MappingMode {
+  PerInput = 1; /* Have one set of mappings that covers all extensions */
+  PerExtension = 2; /* Have individual mappings for each input in each extension */
+}
+
+enum FaceButtonMappingMode {
+  LegendBased = 1;   /* Map face buttons by legend */
+  PositionBased = 2; /* Map face buttons by position */
+}
+
+enum WiiExtType {
+    WiiNunchuk = 0x0000;
+    WiiClassicController = 0x0001;
+    WiiClassicControllerPro = 0x0101;
+    WiiThqUdrawTablet = 0xFF12;
+    WiiUbisoftDrawsomeTablet = 0xFF13;
+    WiiGuitarHeroGuitar = 0x0003;
+    WiiGuitarHeroDrums = 0x0103;
+    WiiDjHeroTurntable = 0x0303;
+    WiiTaikoNoTatsujinController = 0x0011;
+    WiiMotionPlus = 0x0005;
+    WiiNoExtension = 0x180b;
+    WiiNotInitialised = 0xFFFF;
+} ;
+
+enum SubType {
+  Gamepad = 1;
+  Dancepad = 2;
+  GuitarHeroGuitar = 3;
+  RockBandGuitar = 4;
+  GuitarHeroDrums = 5;
+  RockBandDrums = 6;
+  LiveGuitar = 7;
+  DjHeroTurntable = 8;
+  StageKit = 9;
+  DisneyInfinity = 10;
+  Skylanders = 11;
+  LegoDimensions = 12;
+  ProjectDiva = 13;
+  GuitarFreaks = 14;
+  Wheel = 15;
+  ProKeys = 16;
+  ProGuitarMustang = 17;
+  ProGuitarSquire = 18;
+  KeyboardMouse = 19;
+  FightStick = 20;
+  FlightStick = 21;
+  PopNMusic = 22;
+  DJMax = 23;
+  Taiko = 24;
+  PowerGigDrum = 25;
+  PowerGigGuitar = 26;
+  RockRevolutionGuitar = 27;
+  Midi = 28;
+  Unknown = 255;
+}
+
+enum PinMode {
+  PullDown = 1;
+  PullUp = 2;
+  Floating = 3;
+  BusKeep = 4;
+}
+
+enum Mpr121PinMode {
+  Touch = 1;
+  Digital = 2;
+}
+
+enum UsbDeviceType {
+  UsbDeviceTypeGeneric = 1;
+  UsbDeviceTypeSantroller = 2;
+  UsbDeviceTypeXbox360 = 3;
+  UsbDeviceTypeXbox360Wireless = 4;
+  UsbDeviceTypeXbox360BigButton = 5;
+  UsbDeviceTypeXboxOne = 6;
+  UsbDeviceTypeXboxOG = 7;
+  UsbDeviceTypePS3 = 8;
+  UsbDeviceTypePS4 = 9;
+  UsbDeviceTypePS5 = 10;
+  UsbDeviceTypeWiiRockBand = 11;
+  UsbDeviceTypeSwitch = 12;
+  UsbDeviceTypeRaphnet = 13;
+  UsbDeviceTypeStreamDeck = 14;
+  UsbDeviceTypeLTEK = 15;
+  UsbDeviceTypeStadia = 16;
+  UsbDeviceTypeMidi = 17;
+  UsbDeviceTypeKeyboard = 18;
+  UsbDeviceTypeMouse = 19;
+}
+
+
+enum PS2ControllerType {
+  PS2ControllerTypeUnknown = 1;
+  PS2ControllerTypeDigital = 2;
+  PS2ControllerTypeDualshock = 3;
+  PS2ControllerTypeDualshock2 = 4;
+  PS2ControllerTypeGuitar = 5;
+  PS2ControllerTypeNegCon = 6;
+  PS2ControllerTypeJogCon = 7;
+  PS2ControllerTypeGunCon = 8;
+  PS2ControllerTypeFlightStick = 9;
+  PS2ControllerTypeMouse = 10;
+  PS2ControllerTypeTaiko = 11;
+  PS2ControllerTypePopNMusic = 12;
+}
+
+enum APA102Type {
+  Apa102Rgb=1;
+  Apa102Rbg=2;
+  Apa102Grb=3;
+  Apa102Gbr=4;
+  Apa102Brg=5;
+  Apa102Bgr=6;
+}
+
+enum WS2812Type {
+  Ws2812Rgb = 1;
+  Ws2812Rbg = 2;
+  Ws2812Grb = 3;
+  Ws2812Gbr = 4;
+  Ws2812Brg = 5;
+  Ws2812Bgr = 6;
+  Ws2812Rgbw = 7;
+  Ws2812Rbgw = 8;
+  Ws2812Grbw = 9;
+  Ws2812Gbrw = 10;
+  Ws2812Brgw = 11;
+  Ws2812Bgrw = 12;
+}
+
+enum ConsoleMode {
+    ModeHid=1;
+    ModeOgXbox=2;
+    ModeXbox360=3;
+    ModeXboxOne=4;
+    ModePs3=5;
+    ModePs4=6;
+    ModePs5=7;
+    ModeWiiRb=8;
+    ModeSwitch=9;
+    ModeGuitarHeroArcade = 10;
+};
+
+enum ConsoleType {
+    ConsoleWii_WiiU=1;
+    ConsoleOgXbox=2;
+    ConsoleXbox360=3;
+    ConsoleXboxOne=4;
+    ConsolePS2=5;
+    ConsolePS3=6;
+    ConsolePS4_PS5=7;
+    ConsoleSwitch_Switch2=8;
+    ConsolePC=9;
+}
+
+enum PinDetectType {
+    DetectDigital=1;
+    DetectAnalog=2;
+}
+
+enum RgbPatternType {
+    PatternRainbow=1;
+    PatternFade=2;
+}
+enum ReactiveRgbPatternType {
+    PatternStatic=1;
+    PatternHeatmap=2;
+    PatternSpread=3;
+}
+
+enum CapabilitiyFlags {
+    CapabilityHasStandardPlayerLeds=1; /* Has standard player LEDs */
+    CapabilityHasRGBIndicatorLed=2; /* Has RGB indicator LED */
+    CapabilityHasInstrumentLeds=4; /* Has instrument LEDs (Stage kit format or santroller format) */
+    CapabilityHasRumble=8; /* Has rumble */
+    CapabilityDpadAsButtons=16; /* Treat D-pad as buttons instead of hat */
+}
+
+enum ProfileAssignMask {
+    AssignUsb=1; /* Profile is assignable to usb device*/
+    AssignBluetoothGamepad=2; /* Profile is assignable to bluetooth */
+    AssignPsx=4; /* Profile is assignable to PSX emulation */
+    AssignBluetoothWiimote=8; /* Profile is assignable to Wiimote emulation */
+    AssignWiimoteExtension=16; /* Profile is assignable to Wiimote extension emulation */
+}
+
+enum BluetoothMode {
+    BTStandard=1;
+    BTWiimote=2;
+}
+
+enum CycleType {
+  custom=1;
+  pickup=2;
+}
+
+enum CrkdDrumCalibrationType {
+  Debounce=1;
+  Min=2;
+  Max=3;
+  HoldTick=4;
+  RawValue=5;
+}
